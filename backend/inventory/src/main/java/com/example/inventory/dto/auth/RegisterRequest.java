@@ -23,7 +23,5 @@ public class RegisterRequest {
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
-    // Optional: allows creating an ADMIN during registration for seeding/testing.
-    // In production you'd likely restrict this to USER only and promote admins separately.
     private String role;
 }
