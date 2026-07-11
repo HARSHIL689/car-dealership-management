@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import MainLayout from "./layouts/MainLayout";
 
 function App() {
 
@@ -13,13 +14,16 @@ function App() {
     <Routes>
 
             <Route path="/login" element={<Login />} />
+
             <Route path="/register" element={<Register />} />
 
             <Route
                 path="/"
                 element={
                     <ProtectedRoute>
-                        <Dashboard />
+                        <MainLayout>
+                            <Dashboard />
+                        </MainLayout>
                     </ProtectedRoute>
                 }
             />
@@ -28,10 +32,13 @@ function App() {
                 path="/admin"
                 element={
                     <ProtectedRoute adminOnly={true}>
-                        <Admin />
+                        <MainLayout>
+                            <Admin />
+                        </MainLayout>
                     </ProtectedRoute>
                 }
             />
+
         </Routes>
   )
 }
