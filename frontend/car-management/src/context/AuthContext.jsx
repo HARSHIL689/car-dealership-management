@@ -1,38 +1,49 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
+const getStoredUser = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) return null;
+
+    return {
+        token,
+        userId: localStorage.getItem("userId"),
+        fullName: localStorage.getItem("fullName"),
+        email: localStorage.getItem("email"),
+        role: localStorage.getItem("role"),
+    };
+};
+
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-
-        if (!token) return;
-
-        const storedUser = {
-            token,
-            userId: localStorage.getItem("userId"),
-            fullName: localStorage.getItem("fullName"),
-            email: localStorage.getItem("email"),
-            role: localStorage.getItem("role"),
-        };
-
-        setUser(storedUser);
-    }, []);
+    const [user, setUser] = useState(getStoredUser);
 
     const login = (loginResponse) => {
-        localStorage.setItem("token", loginResponse.token);
-        localStorage.setItem("userId", loginResponse.userId);
-        localStorage.setItem("fullName", loginResponse.fullName);
-        localStorage.setItem("email", loginResponse.email);
-        localStorage.setItem("role", loginResponse.role);
+        const loggedInUser = {
+            token: loginResponse.token,
+            userId: loginResponse.userId,
+            fullName: loginResponse.fullName,
+            email: loginResponse.email,
+            role: loginResponse.role,
+        };
 
-        setUser(loginResponse);
+        localStorage.setItem("token", loggedInUser.token);
+        localStorage.setItem("userId", loggedInUser.userId);
+        localStorage.setItem("fullName", loggedInUser.fullName);
+        localStorage.setItem("email", loggedInUser.email);
+        localStorage.setItem("role", loggedInUser.role);
+
+        setUser(loggedInUser);
     };
 
     const logout = () => {
-        localStorage.clear();
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("fullName");
+        localStorage.removeItem("email");
+        localStorage.removeItem("role");
+
         setUser(null);
     };
 
