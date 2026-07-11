@@ -7,6 +7,7 @@ import Admin from "./pages/Admin";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./layouts/MainLayout";
+import "./App.css";
 
 function App() {
 

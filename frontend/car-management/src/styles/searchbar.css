@@ -1,0 +1,282 @@
+/* ========================
+   Search Container
+   ======================== */
+.search-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================
+   Search Header
+   ======================== */
+.search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.search-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-icon {
+    font-size: 24px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.search-title h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.active-filters-badge {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #4f46e5, #06b6d4);
+    color: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ========================
+   Search Form
+   ======================== */
+.search-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    align-items: end;
+}
+
+/* ========================
+   Search Fields
+   ======================== */
+.search-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.search-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.label-icon {
+    font-size: 14px;
+}
+
+/* ========================
+   Search Inputs
+   ======================== */
+.search-input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.search-input:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+}
+
+.search-input:focus {
+    border-color: #4f46e5;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    transform: translateY(-1px);
+}
+
+.search-input.active {
+    border-color: #4f46e5;
+    background: #eef2ff;
+}
+
+/* Remove number input spinners */
+.search-input[type="number"]::-webkit-inner-spin-button,
+.search-input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.search-input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* ========================
+   Action Buttons
+   ======================== */
+.search-actions {
+    display: flex;
+    gap: 10px;
+    grid-column: 1 / -1;
+}
+
+.search-btn,
+.clear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+}
+
+.btn-icon {
+    font-size: 16px;
+}
+
+/* Search Button */
+.search-btn {
+    flex: 2;
+    background: linear-gradient(135deg, #4f46e5, #3730a3);
+    color: white;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.search-btn:hover {
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    transform: translateY(-2px);
+}
+
+.search-btn:active {
+    transform: translateY(0);
+}
+
+/* Clear Button */
+.clear-btn {
+    flex: 1;
+    background: #f1f5f9;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+}
+
+.clear-btn:hover {
+    background: #e2e8f0;
+    color: #475569;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.clear-btn:active {
+    transform: translateY(0);
+}
+
+/* ========================
+   Responsive Design
+   ======================== */
+@media (max-width: 1024px) {
+    .search-form {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .search-container {
+        padding: 20px;
+    }
+
+    .search-form {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .search-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .search-title h3 {
+        font-size: 18px;
+    }
+
+    .search-actions {
+        flex-direction: column;
+    }
+
+    .search-btn,
+    .clear-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-container {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .search-input {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .search-btn,
+    .clear-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+}

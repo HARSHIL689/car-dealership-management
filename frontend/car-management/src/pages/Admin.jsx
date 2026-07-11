@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getVehicles, addVehicle, updateVehicle, deleteVehicle, restockVehicle } from "../api/vehicleApi";
+import "../styles/admin.css";
 
 function Admin() {
     const [vehicles, setVehicles] = useState([]);
