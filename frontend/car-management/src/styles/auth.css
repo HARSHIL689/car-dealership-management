@@ -23,3 +23,11 @@
 .success {
     color: green;
 }
+
+.auth-container h2 {
+    text-align: center;
+}
+
+.auth-container button {
+    cursor: pointer;
+}
