@@ -19,3 +19,27 @@
     gap:20px;
 
 }
+
+.search-form{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+
+    gap:15px;
+
+    margin-bottom:30px;
+
+}
+
+.search-form input{
+
+    padding:10px;
+
+}
+
+.search-form button{
+
+    padding:10px;
+
+}
