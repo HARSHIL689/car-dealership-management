@@ -12,51 +12,48 @@ function Navbar() {
 
     return (
         <nav className="navbar">
+            <div className="navbar-brand">
+                <Link to="/">
+                    Vehicle Store
+                </Link>
+            </div>
 
-            <div className="navbar-left">
-
+            <div className="navbar-links">
                 {isAuthenticated && (
-                    <Link to="/">
+                    <Link to="/" className="nav-link">
                         Dashboard
                     </Link>
                 )}
 
-                {user?.role === "ADMIN" && (
-                    <Link to="/admin">
-                        Admin
+                {isAuthenticated && user?.role === "ADMIN" && (
+                    <Link to="/admin" className="nav-link">
+                        Admin Panel
                     </Link>
                 )}
-
             </div>
 
-            <div className="navbar-right">
-
-                {!isAuthenticated && (
+            <div className="navbar-auth">
+                {!isAuthenticated ? (
                     <>
-                        <Link to="/login">
+                        <Link to="/login" className="nav-link">
                             Login
                         </Link>
-
-                        <Link to="/register">
+                        <Link to="/register" className="nav-link">
                             Register
                         </Link>
                     </>
-                )}
-
-                {isAuthenticated && (
-                    <>
-                        <span>
+                ) : (
+                    <div className="user-info">
+                        <span className="welcome-text">
                             Welcome, {user.fullName}
                         </span>
-
-                        <button onClick={handleLogout}>
+                        <span className="role-badge">{user.role}</span>
+                        <button onClick={handleLogout} className="logout-btn">
                             Logout
                         </button>
-                    </>
+                    </div>
                 )}
-
             </div>
-
         </nav>
     );
 }

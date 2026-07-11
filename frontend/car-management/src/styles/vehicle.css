@@ -34,3 +34,17 @@
     cursor:not-allowed;
 
 }
+
+.vehicle-card input{
+
+    width:100%;
+
+    padding:8px;
+
+    margin-top:12px;
+
+    margin-bottom:10px;
+
+    box-sizing:border-box;
+
+}
