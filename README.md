@@ -19,6 +19,7 @@ A full-stack car dealership inventory management system built with **Spring Boot
 - [Running with Docker (backend)](#running-with-docker-backend)
 - [Building for Production](#building-for-production)
 - [Live Demo](#live-demo)
+- [Test Report](#test-report)
 - [My AI Usage](#my-ai-usage)
 
 ## Features
@@ -272,14 +273,97 @@ This generates a production-ready build in `frontend/car-management/dist/`, whic
 
 The deployed project can be viewed here: [car-dealership-management-tldz.onrender.com](https://car-dealership-management-tldz.onrender.com/)
 
+## Test Report
+
+The backend test suite was run with Maven (`./mvnw test`) using JUnit 5 and Mockito, against an in-memory H2 database configured specifically for the test environment (so the suite doesn't depend on a live PostgreSQL instance or real secrets).
+
+### Summary
+
+| Metric | Result |
+|---|---|
+| **Test classes run** | 3 |
+| **Total tests run** | 16 |
+| **Passed** | 16 |
+| **Failures** | 0 |
+| **Errors** | 0 |
+| **Skipped** | 0 |
+| **Build status** | ✅ `BUILD SUCCESS` |
+| **Total execution time** | ~10.5s |
+
+### Results by test class
+
+| Test class | Tests | Failures | Errors | Time |
+|---|---|---|---|---|
+| `InventoryApplicationTests` | 1 | 0 | 0 | 6.058s |
+| `AuthServiceTest` | 5 | 0 | 0 | 0.715s |
+| `VehicleServiceTest` | 10 | 0 | 0 | 0.200s |
+
+### What's covered
+
+**`InventoryApplicationTests`**
+- Verifies the full Spring application context loads successfully (`contextLoads`), including security, JPA, and web configuration.
+
+**`AuthServiceTest`** (5 tests)
+- Registering a new user with the default `USER` role
+- Registering a new user with an explicit `ADMIN` role
+- Rejecting registration when the email is already in use (`EmailAlreadyExistsException`)
+- Logging in successfully and receiving a valid JWT
+- Rejecting login with invalid credentials (`InvalidCredentialsException`)
+
+**`VehicleServiceTest`** (10 tests)
+- Adding a new vehicle successfully
+- Rejecting a duplicate vehicle (same make, model, category, and price)
+- Listing vehicles while excluding out-of-stock items by default
+- Listing vehicles including out-of-stock items when requested
+- Purchasing a vehicle and correctly reducing stock
+- Rejecting a purchase when requested quantity exceeds available stock (`InsufficientStockException`)
+- Rejecting a purchase for a non-existent vehicle (`VehicleNotFoundException`)
+- Restocking a vehicle and correctly increasing stock
+- Deleting an existing vehicle
+- Rejecting deletion of a non-existent vehicle (`VehicleNotFoundException`)
+
+### Raw output
+
+```
+[INFO] Running com.example.inventory.InventoryApplicationTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.058 s -- in com.example.inventory.InventoryApplicationTests
+[INFO] Running com.example.inventory.service.AuthServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.715 s -- in com.example.inventory.service.AuthServiceTest
+[INFO] Running com.example.inventory.service.VehicleServiceTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.200 s -- in com.example.inventory.service.VehicleServiceTest
+
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10.461 s
+```
+
+### How to reproduce
+
+```bash
+cd backend/inventory
+./mvnw test
+```
+
+Detailed per-test XML/TXT reports are generated in `backend/inventory/target/surefire-reports/` after each run.
+
 ## My AI Usage
 
-During the development of this application, I used AI to generate boilerplate code for the JWT and authentication files.
+I used AI tools throughout the development of this project — primarily **Claude**, along with **OpenAI** and **DeepSeek** — as coding assistants rather than as a replacement for understanding the system.
 
-AI was very helpful for resolving errors and generating different test cases to test the API endpoints.
+**Backend**
+- Generated boilerplate for the JWT authentication flow (token generation/validation, the security filter chain, and `UserDetailsService` wiring), which I then reviewed and adapted to fit the project's structure.
+- Helped design and write the unit test suite (`AuthServiceTest`, `VehicleServiceTest`) using JUnit 5 and Mockito, covering both the happy paths and the edge cases (duplicate vehicles, insufficient stock, invalid credentials, not-found scenarios).
+- Diagnosed a failing `contextLoads` test caused by the Spring context trying to connect to a real PostgreSQL database during test runs, and helped set up an isolated in-memory H2 configuration for tests so the full suite can run without external dependencies or secrets.
+- Assisted with debugging exceptions, interpreting stack traces, and fixing Maven/Spring configuration issues.
 
-Most of the frontend was designed and styled with the help of AI tools.
+**Frontend**
+- Most of the UI was designed and styled with AI assistance — including component structure, Tailwind CSS styling, layout decisions, and responsive design.
+- Helped generate larger chunks of repetitive UI code (forms, cards, protected routes) faster than writing them by hand.
 
-I used Claude, OpenAI, and DeepSeek throughout the development of this application.
-
-AI was extremely helpful for generating large chunks of UI code, debugging, finding errors, generating test cases, and — most importantly — learning about edge cases I hadn't considered.
+**Overall**
+AI was most valuable for speeding up repetitive/boilerplate work, catching errors early, generating realistic test cases, and — most importantly — surfacing edge cases I hadn't originally considered (like duplicate-vehicle detection or handling out-of-stock purchases).
