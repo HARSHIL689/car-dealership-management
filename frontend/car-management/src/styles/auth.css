@@ -1,0 +1,25 @@
+.auth-container {
+    width: 350px;
+    margin: 50px auto;
+}
+
+.auth-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.auth-container input,
+.auth-container select,
+.auth-container button {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.error {
+    color: red;
+}
+
+.success {
+    color: green;
+}
