@@ -25,6 +25,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    @ExceptionHandler(DuplicateVehicleException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateVehicle(DuplicateVehicleException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler({InvalidCredentialsException.class, BadCredentialsException.class})
     public ResponseEntity<Map<String, Object>> handleInvalidCredentials(RuntimeException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());

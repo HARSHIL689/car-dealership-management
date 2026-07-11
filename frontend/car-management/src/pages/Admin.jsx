@@ -10,6 +10,7 @@ function Admin() {
     const [editingVehicle, setEditingVehicle] = useState(null);
     const [restockingVehicle, setRestockingVehicle] = useState(null);
     const [restockQuantity, setRestockQuantity] = useState(1);
+    const [duplicateInfo, setDuplicateInfo] = useState(null);
     
     const [formData, setFormData] = useState({
         make: "",
@@ -25,7 +26,9 @@ function Admin() {
         
         try {
             const data = await getVehicles(true);
-            setVehicles(data);
+            // Sort vehicles by stock in ascending order (lowest stock first)
+            const sortedVehicles = data.sort((a, b) => a.quantityInStock - b.quantityInStock);
+            setVehicles(sortedVehicles);
         } catch (err) {
             setError("Failed to load vehicles.");
         } finally {
@@ -43,6 +46,11 @@ function Admin() {
             ...formData,
             [name]: value,
         });
+        
+        // Clear duplicate info when user changes input
+        if (duplicateInfo) {
+            setDuplicateInfo(null);
+        }
     };
 
     const resetForm = () => {
@@ -55,6 +63,7 @@ function Admin() {
         });
         setEditingVehicle(null);
         setShowForm(false);
+        setDuplicateInfo(null);
     };
 
     const handleEdit = (vehicle) => {
@@ -68,6 +77,7 @@ function Admin() {
         setEditingVehicle(vehicle);
         setShowForm(true);
         setRestockingVehicle(null);
+        setDuplicateInfo(null);
     };
 
     const handleSubmit = async (e) => {
@@ -95,13 +105,65 @@ function Admin() {
             
             setTimeout(() => setSuccess(""), 3000);
         } catch (err) {
-            if (err.response && err.response.data.message) {
-                setError(err.response.data.message);
-            } else if (err.response && err.response.data.fieldErrors) {
-                const errors = Object.values(err.response.data.fieldErrors);
-                setError(errors.join(", "));
+            if (err.response) {
+                // Handle duplicate vehicle error (409 Conflict)
+                if (err.response.status === 409) {
+                    const errorMessage = err.response.data.message;
+                    setError(errorMessage);
+                    
+                    // Extract existing vehicle ID from error message if available
+                    const idMatch = errorMessage.match(/ID: (\d+)/);
+                    if (idMatch) {
+                        const existingId = parseInt(idMatch[1]);
+                        const existingVehicle = vehicles.find(v => v.id === existingId);
+                        
+                        if (existingVehicle) {
+                            setDuplicateInfo({
+                                existingVehicle,
+                                newQuantity: vehicleData.quantityInStock
+                            });
+                        }
+                    }
+                } else if (err.response.data.message) {
+                    setError(err.response.data.message);
+                } else if (err.response.data.fieldErrors) {
+                    const errors = Object.values(err.response.data.fieldErrors);
+                    setError(errors.join(", "));
+                } else {
+                    setError("Operation failed.");
+                }
             } else {
                 setError("Operation failed.");
+            }
+        }
+    };
+
+    const handleAddToExisting = async () => {
+        if (!duplicateInfo) return;
+        
+        setError("");
+        setSuccess("");
+        
+        try {
+            const result = await restockVehicle(
+                duplicateInfo.existingVehicle.id, 
+                duplicateInfo.newQuantity
+            );
+            
+            setSuccess(
+                `Added ${duplicateInfo.newQuantity} units to existing ${duplicateInfo.existingVehicle.make} ${duplicateInfo.existingVehicle.model}. ` +
+                `New stock: ${result.quantityInStock}`
+            );
+            
+            resetForm();
+            loadVehicles();
+            
+            setTimeout(() => setSuccess(""), 3000);
+        } catch (err) {
+            if (err.response && err.response.data.message) {
+                setError(err.response.data.message);
+            } else {
+                setError("Failed to add stock to existing vehicle.");
             }
         }
     };
@@ -129,6 +191,7 @@ function Admin() {
         setRestockQuantity(1);
         setEditingVehicle(null);
         setShowForm(false);
+        setDuplicateInfo(null);
     };
 
     const handleRestockSubmit = async (e) => {
@@ -145,7 +208,6 @@ function Admin() {
 
         try {
             const result = await restockVehicle(restockingVehicle.id, quantity);
-            console.log("Restock result:", result);
             
             setSuccess(`Successfully restocked ${quantity} ${restockingVehicle.make} ${restockingVehicle.model}(s)! New stock: ${result.quantityInStock}`);
             
@@ -194,6 +256,39 @@ function Admin() {
             {showForm && (
                 <form onSubmit={handleSubmit} className="vehicle-form">
                     <h3>{editingVehicle ? "Edit Vehicle" : "Add New Vehicle"}</h3>
+                    
+                    {duplicateInfo && (
+                        <div className="duplicate-warning">
+                            <p>
+                                ⚠️ This vehicle already exists in the system!
+                            </p>
+                            <p>
+                                <strong>Existing Vehicle:</strong> {duplicateInfo.existingVehicle.make} {duplicateInfo.existingVehicle.model} 
+                                (ID: {duplicateInfo.existingVehicle.id})
+                            </p>
+                            <p>
+                                Current Stock: {duplicateInfo.existingVehicle.quantityInStock} | 
+                                Price: ₹{duplicateInfo.existingVehicle.price.toLocaleString()}
+                            </p>
+                            <p>
+                                Would you like to add {duplicateInfo.newQuantity} units to the existing stock instead?
+                            </p>
+                            <button 
+                                type="button" 
+                                onClick={handleAddToExisting}
+                                className="add-to-existing-btn"
+                            >
+                                Yes, Add {duplicateInfo.newQuantity} Units to Existing Vehicle
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={() => setDuplicateInfo(null)}
+                                className="cancel-duplicate-btn"
+                            >
+                                No, I'll Change the Details
+                            </button>
+                        </div>
+                    )}
                     
                     <input
                         type="text"
@@ -305,13 +400,17 @@ function Admin() {
                         </thead>
                         <tbody>
                             {vehicles.map((vehicle) => (
-                                <tr key={vehicle.id}>
+                                <tr key={vehicle.id} className={vehicle.quantityInStock === 0 ? 'out-of-stock-row' : vehicle.quantityInStock < 5 ? 'low-stock-row' : ''}>
                                     <td>{vehicle.id}</td>
                                     <td>{vehicle.make}</td>
                                     <td>{vehicle.model}</td>
                                     <td>{vehicle.category}</td>
                                     <td>₹{vehicle.price.toLocaleString()}</td>
-                                    <td>{vehicle.quantityInStock}</td>
+                                    <td>
+                                        <span className={vehicle.quantityInStock === 0 ? 'stock-out' : vehicle.quantityInStock < 5 ? 'stock-low' : 'stock-normal'}>
+                                            {vehicle.quantityInStock}
+                                        </span>
+                                    </td>
                                     <td>
                                         <span className={`status-badge ${vehicle.available ? 'available' : 'out-of-stock'}`}>
                                             {vehicle.available ? "Available" : "Out of Stock"}

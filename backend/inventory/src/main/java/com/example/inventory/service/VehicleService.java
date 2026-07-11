@@ -5,17 +5,21 @@ import com.example.inventory.dto.vehicle.RestockRequest;
 import com.example.inventory.dto.vehicle.VehicleRequest;
 import com.example.inventory.dto.vehicle.VehicleResponse;
 import com.example.inventory.entity.Vehicle;
+import com.example.inventory.exception.DuplicateVehicleException;
 import com.example.inventory.exception.InsufficientStockException;
 import com.example.inventory.exception.VehicleNotFoundException;
 import com.example.inventory.repository.VehicleRepository;
 import com.example.inventory.repository.VehicleSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VehicleService {
@@ -24,6 +28,27 @@ public class VehicleService {
 
     @Transactional
     public VehicleResponse addVehicle(VehicleRequest request) {
+        // Check for duplicate vehicle
+        List<Vehicle> allVehicles = vehicleRepository.findAll();
+
+        Optional<Vehicle> existingVehicle = allVehicles.stream()
+                .filter(v -> v.getMake().equalsIgnoreCase(request.getMake()))
+                .filter(v -> v.getModel().equalsIgnoreCase(request.getModel()))
+                .filter(v -> v.getCategory().equalsIgnoreCase(request.getCategory()))
+                .filter(v -> v.getPrice().compareTo(request.getPrice()) == 0)
+                .findFirst();
+
+        if (existingVehicle.isPresent()) {
+            Vehicle duplicate = existingVehicle.get();
+            throw new DuplicateVehicleException(
+                    "A vehicle with make '" + request.getMake() +
+                            "', model '" + request.getModel() +
+                            "', category '" + request.getCategory() +
+                            "', and price " + request.getPrice() +
+                            " already exists with ID: " + duplicate.getId()
+            );
+        }
+
         Vehicle vehicle = Vehicle.builder()
                 .make(request.getMake())
                 .model(request.getModel())
@@ -32,7 +57,10 @@ public class VehicleService {
                 .quantityInStock(request.getQuantityInStock())
                 .build();
 
-        return toResponse(vehicleRepository.save(vehicle));
+        Vehicle savedVehicle = vehicleRepository.save(vehicle);
+        log.info("Added new vehicle with ID: {}", savedVehicle.getId());
+
+        return toResponse(savedVehicle);
     }
 
     /**
@@ -59,6 +87,34 @@ public class VehicleService {
     @Transactional
     public VehicleResponse updateVehicle(Long id, VehicleRequest request) {
         Vehicle vehicle = getVehicleOrThrow(id);
+
+        // Check for duplicate if make, model, category, or price is being changed
+        if (!vehicle.getMake().equalsIgnoreCase(request.getMake()) ||
+                !vehicle.getModel().equalsIgnoreCase(request.getModel()) ||
+                !vehicle.getCategory().equalsIgnoreCase(request.getCategory()) ||
+                vehicle.getPrice().compareTo(request.getPrice()) != 0) {
+
+            List<Vehicle> allVehicles = vehicleRepository.findAll();
+
+            Optional<Vehicle> duplicateVehicle = allVehicles.stream()
+                    .filter(v -> !v.getId().equals(id))
+                    .filter(v -> v.getMake().equalsIgnoreCase(request.getMake()))
+                    .filter(v -> v.getModel().equalsIgnoreCase(request.getModel()))
+                    .filter(v -> v.getCategory().equalsIgnoreCase(request.getCategory()))
+                    .filter(v -> v.getPrice().compareTo(request.getPrice()) == 0)
+                    .findFirst();
+
+            if (duplicateVehicle.isPresent()) {
+                Vehicle duplicate = duplicateVehicle.get();
+                throw new DuplicateVehicleException(
+                        "A vehicle with make '" + request.getMake() +
+                                "', model '" + request.getModel() +
+                                "', category '" + request.getCategory() +
+                                "', and price " + request.getPrice() +
+                                " already exists with ID: " + duplicate.getId()
+                );
+            }
+        }
 
         vehicle.setMake(request.getMake());
         vehicle.setModel(request.getModel());
