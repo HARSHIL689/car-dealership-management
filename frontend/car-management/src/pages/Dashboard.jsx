@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { getVehicles, searchVehicles } from "../api/vehicleApi";
 import VehicleCard from "../components/VehicleCard";
 import SearchBar from "../components/SearchBar";
+import "../styles/dashboard.css";
 
 function Dashboard() {
     const [vehicles, setVehicles] = useState([]);
