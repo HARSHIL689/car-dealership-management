@@ -1,0 +1,13 @@
+# Files and folders to exclude from Docker build
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!target/*.jar
+*.class
+*.log
+.git/
+.gitignore
+.idea/
+.vscode/
+*.iml
+.DS_Store
+node_modules/
